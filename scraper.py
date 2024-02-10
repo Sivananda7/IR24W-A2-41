@@ -15,6 +15,18 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
+    if resp.status != 200 or not resp.raw_response:
+        return []
+    
+    links = []
+    soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
+    
+    # Extract all links from the page
+    for link in soup.find_all('a', href=True):
+        absolute_link = urlparse.urljoin(url, link['href'])
+        absolute_link = re.sub(r"#.*$", "", absolute_link)  # Remove URL fragment
+        if is_valid(absolute_link):
+            links.append(absolute_link)
     return list()
 
 def is_valid(url):
