@@ -1,5 +1,6 @@
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
+from bs4 import BeautifulSoup
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -21,13 +22,12 @@ def extract_next_links(url, resp):
     links = []
     soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
     
-    # Extract all links from the page
     for link in soup.find_all('a', href=True):
-        absolute_link = urlparse.urljoin(url, link['href'])
+        absolute_link = urljoin(url, link['href'])  # Use urljoin directly here
         absolute_link = re.sub(r"#.*$", "", absolute_link)  # Remove URL fragment
         if is_valid(absolute_link):
             links.append(absolute_link)
-    return list()
+    return links
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
