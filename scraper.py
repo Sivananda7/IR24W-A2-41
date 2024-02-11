@@ -20,13 +20,27 @@ def extract_next_links(url, resp):
         return []
     
     links = []
+    vistied_links = set() # Already seen link
+    similar_url = set()
+    # Inorder not to see the link again.
+
     soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
     
     for link in soup.find_all('a', href=True):
         absolute_link = urljoin(url, link['href'])  # Use urljoin directly here
         absolute_link = re.sub(r"#.*$", "", absolute_link)  # Remove URL fragment
+
+        # Checkeing the above link is valid.
         if is_valid(absolute_link):
-            links.append(absolute_link)
+
+            # http://www.ics.uci.edu#aaa and http://www.ics.uci.edu#bbb are the same URL
+            
+            if absolute_link.split('#', 1)[0] not in similar_url:
+                similar_url.add(absolute_link.split('#', 1)[0])
+                if absolute_link not in vistied_links:
+                    links.append(absolute_link)
+                    vistied_links.add(absolute_link)
+        
     return links
 
 def is_valid(url):
