@@ -1,8 +1,12 @@
 import re
 from urllib.parse import urlparse, urljoin
+from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
 
 def scraper(url, resp):
+    # Storing links from the next pages.
+    if resp.status != 200:
+        return []
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
@@ -16,12 +20,14 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    if resp.status != 200 or not resp.raw_response:
-        return []
+
     
-    links = []
+    links = list() # Storing all the links here...
+    if resp.status != 200:
+        return [] # Not Found...
+    
     vistied_links = set() # Already seen link
-    similar_url = set()
+    similar_url = set()          # http://www.ics.uci.edu#aaa and http://www.ics.uci.edu#bbb are the same URL
     # Inorder not to see the link again.
 
     soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
@@ -31,15 +37,11 @@ def extract_next_links(url, resp):
         absolute_link = re.sub(r"#.*$", "", absolute_link)  # Remove URL fragment
 
         # Checkeing the above link is valid.
-        if is_valid(absolute_link):
+        if absolute_link not in vistied_links:
+            links.append(absolute_link)
+            vistied_links.add(absolute_link)
 
-            # http://www.ics.uci.edu#aaa and http://www.ics.uci.edu#bbb are the same URL
-            
-            if absolute_link.split('#', 1)[0] not in similar_url:
-                similar_url.add(absolute_link.split('#', 1)[0])
-                if absolute_link not in vistied_links:
-                    links.append(absolute_link)
-                    vistied_links.add(absolute_link)
+        # http://www.ics.uci.edu#aaa and http://www.ics.uci.edu#bbb are the same URL
         
     return links
 
@@ -51,23 +53,69 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-        return not re.match(
-            r".*\.(css|js|bmp|gif|jpe?g|ico"
-            + r"|png|tiff?|mid|mp2|mp3|mp4"
-            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
-            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
-            + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
-            + r"|epub|dll|cnf|tgz|sha1"
-            + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
-            + r"|aac|flac|m4a"
-            + r"|svg|webp|flv|3gp|webm"
-            + r"|rar|zip|7z|gz|xz|tar.gz"
-            + r"odt|ods|odp|rtf"
-            + r"|sh|bat|cmd|vbs"
-            + r"|json|xml|woff|woff2|eot"
-            + r"|ttf|otf)$", parsed.path.lower())
+        
+        if re.match(
+                r".*\.(css|js|bmp|gif|jpe?g|ico"
+                + r"|png|tiff?|mid|mp2|mp3|mp4"
+                + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
+                + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
+                + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
+                + r"|epub|dll|cnf|tgz|sha1"
+                + r"|thmx|mso|arff|rtf|jar|csv"
+                + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
+                + r"|aac|flac|m4a"
+                + r"|svg|webp|flv|3gp|webm"
+                + r"|rar|zip|7z|gz|xz|tar.gz"
+                + r"odt|ods|odp|rtf"
+                + r"|sh|bat|cmd|vbs"
+                + r"|json|xml|woff|woff2|eot"
+                + r"|ttf|otf)$", parsed.path.lower()):
+            return False
+            
+        #Checking if the domain is only of this form
+        #Only ics.uci.edu
+        parsed_url = urlparse(url)
+        domain = parsed_url.netloc.lower()
+        pattern = r"^(.*\.)?(ics|cs|informatics|stat)\.uci\.edu$"
 
+        if re.match(pattern, domain) ==  False:
+            return False
+        
+        # Checking for Traps..
+        # Checking for Robot.txt
+
+        robot_parse = RobotFileParser()
+        robot_parse.set_url((f'https://{domain}/robots.txt'))
+        
+        robot_parse.read()
+            # We are not allowed to crawl this website.
+        if not robot_parse.can_fetch('*', url):
+                return False
+            
+            # Checking for events it is a Trap.
+        # Simple trap avoidance: Events and Calendar
+        if "event" in parsed.path.lower() or "calendar" in parsed.path.lower():
+            return False
+
+            # Checking for calender... it is a infinite and the crawler will get Stuck.
+        if re.match(r"^.calendar.$", url):
+            return False
+        
+        # Checking for conitnously repeating Directories 
+        # URL too long and repeating.
+        repeat_or_long_dir_pattern = r'(\/[\w-]{10,})\/\1|\/[\w-]{20,}'
+        if re.search(repeat_or_long_dir_pattern, path_of_url):
+            return False 
+        
+
+        # Checking for Low information value pages...
+        # Criteria Matching more than 50% After 
+        # removing the most Commong words.
+
+
+
+        # The link has passed all the Tests.
+        return True
     except TypeError:
         print ("TypeError for ", parsed)
         raise
