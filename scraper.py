@@ -2,6 +2,11 @@ import re
 from urllib.parse import urlparse, urljoin
 from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
+import certifi
+import ssl
+import urllib.error
+from urllib.parse import urlparse, urljoin
+from urllib.robotparser import RobotFileParser
 
 
 
@@ -103,10 +108,13 @@ def is_valid(url):
         # Checking for Traps..
         # Checking for Robot.txt
 
+        context = ssl.create_default_context(cafile=certifi.where())
         robot_parse = RobotFileParser()
         robot_parse.set_url((f'https://{domain}/robots.txt'))
-        
-        robot_parse.read()
+        try:
+            robot_parse.read()  # Pass the SSL context to urlopen or equivalent function
+        except urllib.error.URLError as e:
+            print(e.reason)
             # We are not allowed to crawl this website.
         if not robot_parse.can_fetch('*', url):
                 return False
