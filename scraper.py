@@ -25,7 +25,6 @@ STOPWORDS = ["i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you",
             "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don",
             "should", "now"]
 
-#This is the code
 def scraper(url, resp):
     # Storing links from the next pages.
     if resp.status != 200:
