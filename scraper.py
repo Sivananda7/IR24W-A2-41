@@ -103,6 +103,7 @@ def is_valid(url):
         
         # Checking for conitnously repeating Directories 
         # URL too long and repeating.
+        path_of_url = parsed.path.lower()
         repeat_or_long_dir_pattern = r'(\/[\w-]{10,})\/\1|\/[\w-]{20,}'
         if re.search(repeat_or_long_dir_pattern, path_of_url):
             return False 
