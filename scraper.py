@@ -103,6 +103,11 @@ def is_valid(url):
                 + r"|json|xml|woff|woff2|eot"
                 + r"|ttf|otf)$", parsed.path.lower()):
             return False
+
+        # Checking for Files formats 
+
+        # 
+        #
             
         #Checking if the domain is only of this form
         #Only ics.uci.edu
@@ -114,6 +119,9 @@ def is_valid(url):
             return False
 
         if url in unique_urls:
+            return False
+        
+        if url.count("/") > 6:  # Very large URL avoiding it.
             return False
         
         # Checking for Traps..
