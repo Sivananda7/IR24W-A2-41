@@ -53,15 +53,27 @@ def extract_next_links(url, resp):
     # Inorder not to see the link again.
 
     soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
-    
-    for link in soup.find_all('a', href=True):
-        absolute_link = urljoin(url, link['href'])  # Use urljoin directly here
-        absolute_link = re.sub(r"#.*$", "", absolute_link)  # Remove URL fragment
 
-        # Checkeing the above link is valid.
-        if absolute_link not in vistied_links:
-            links.append(absolute_link)
-            vistied_links.add(absolute_link)
+
+    # Some files are very large. Assuming Reading only 10MB pages. That is 1024*1024*10
+    # with word limit of not more than 500. 
+
+    words = soup.get_text().split() # Number of words.
+    size_of_page = len(str(soup)) # Size in bytes.
+    
+
+    if size_of_page < 10*1024*1024 and words < 500:
+        # Then add the page to Links 
+
+        for link in soup.find_all('a', href=True):
+            if link:
+                absolute_link = urljoin(url, link['href'])  # Use urljoin directly here
+                absolute_link = re.sub(r"#.*$", "", absolute_link)  # Remove URL fragment
+
+                # Checkeing the above link is valid.
+                if absolute_link not in vistied_links:
+                    links.append(absolute_link)
+                    vistied_links.add(absolute_link)
 
         # http://www.ics.uci.edu#aaa and http://www.ics.uci.edu#bbb are the same URL
         
