@@ -1,5 +1,5 @@
 import re
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin, urldefrag
 from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
 import certifi
@@ -9,7 +9,7 @@ from urllib.parse import urlparse, urljoin
 from urllib.robotparser import RobotFileParser
 
 
-
+#GLOBAL VARIABLES
 STOPWORDS = ["i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you",
             "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself",
             "she", "her", "hers", "herself", "it", "its", "itself", "they", "them",
@@ -24,6 +24,11 @@ STOPWORDS = ["i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you",
             "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own",
             "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don",
             "should", "now"]
+
+
+# Lenght gives all the unique Urls.
+unique_urls =  set()  # colletion of Unique Urls. 
+
 
 def scraper(url, resp):
     # Storing links from the next pages.
@@ -48,13 +53,8 @@ def extract_next_links(url, resp):
     if resp.status != 200:
         return [] # Not Found...
     
-    vistied_links = set() # Already seen link
-    similar_url = set()          # http://www.ics.uci.edu#aaa and http://www.ics.uci.edu#bbb are the same URL
-    # Inorder not to see the link again.
 
     soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
-
-
     # Some files are very large. Assuming Reading only 10MB pages. That is 1024*1024*10
     # with word limit of not more than 500. 
 
@@ -66,17 +66,15 @@ def extract_next_links(url, resp):
         # Then add the page to Links 
 
         for link in soup.find_all('a', href=True):
-            if link:
-                absolute_link = urljoin(url, link['href'])  # Use urljoin directly here
-                absolute_link = re.sub(r"#.*$", "", absolute_link)  # Remove URL fragment
 
-                # Checkeing the above link is valid.
-                if absolute_link not in vistied_links:
-                    links.append(absolute_link)
-                    vistied_links.add(absolute_link)
-
-        # http://www.ics.uci.edu#aaa and http://www.ics.uci.edu#bbb are the same URL
-        
+            absolute_link = urljoin(url, link['href'])
+            if absolute_link:  # Use urljoin directly here
+                if absolute_link.startswith(("http", "https")):
+            
+            # http://www.ics.uci.edu#aaa and http://www.ics.uci.edu#bbb are the same URL
+            # Inorder not to see the link again.
+                    without_fragment = urldefrag(absolute_link).url  # Remove URL fragment and gives the URL
+                    links.append(without_fragment)
     return links
 
 def is_valid(url):
@@ -113,6 +111,9 @@ def is_valid(url):
         pattern = r"^(.*\.)?(ics|cs|informatics|stat)\.uci\.edu$"
 
         if re.match(pattern, domain) ==  False:
+            return False
+
+        if url in unique_urls:
             return False
         
         # Checking for Traps..
@@ -153,6 +154,10 @@ def is_valid(url):
 
 
         # The link has passed all the Tests.
+
+        
+        unique_urls.add(url)  # since unique and passes all the check models 
+        # We can add it to unique_urls.
         return True
     except TypeError:
         print ("TypeError for ", parsed)
