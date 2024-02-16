@@ -34,8 +34,11 @@ previous_pages_tokens = []
 
 # Lenght gives all the unique Urls.
 unique_urls =  set()  # colletion of Unique Urls. 
+number_of_unique_urls = len(unique_urls)
 ics_subdomains = {} # Key : Array [URLS]
 unique_words = {} # Get all the Unique words.
+longest_word_url = None 
+longest_word = 0
 
 def scraper(url, resp):
     # Storing links from the next pages.
@@ -212,12 +215,34 @@ def extractWebsitesUnderDomain(url):
 
 
 
-def LongestPageWord():
+def LongestPageWord(url, resp):
     """
     Finds the largest Page and The Common Words
     """
+    global longest_word, longest_word_url, number_of_unique_urls
+    soup = BeautifulSoup(resp.raw_response.content, "html.parser")
+    text = soup.get_text()
+
+    words_tokenized = re.findall(r'[a-zA-Z0-9]+', text) # Get only the words in the text.
+
+    for i in words_tokenized:
+        if i in STOPWORDS or len(i)<=2:  # Not counting less than 2.
+            pass
+        elif i in unique_words:
+            unique_words[i] += 1
+        else:
+            unique_words[i] = 1
+        
+
+    len_page = len(words_tokenized)
+    if len_page > longest_word:
+        longest_word = len_page
+        longest_word_url = url
+
+    number_of_unique_urls = len(unique_urls)
+
+
     
-    pass
 
 def tokenize(text):
 
