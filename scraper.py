@@ -41,11 +41,19 @@ longest_word_url = None
 longest_word = 0
 
 def scraper(url, resp):
+    links = extract_next_links(url, resp)
+
     # Storing links from the next pages.
+
     if resp.status != 200:
         return []
-    links = extract_next_links(url, resp)
-    return [link for link in links if is_valid(link)]
+    else:
+        valid_links = []
+        for link in links:
+            if is_valid(link):
+                valid_links.append(link)
+        LongestPageWord(url,resp)
+    return valid_links
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -330,4 +338,3 @@ def get_report():
             myFile.write(
                 f"{top_words[i][0]} => {top_words[i][1]}"
             )
-
