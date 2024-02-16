@@ -30,7 +30,7 @@ STOPWORDS = [
     "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't", "you",
     "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"
 ]
-
+previous_pages_tokens = []
 
 # Lenght gives all the unique Urls.
 unique_urls =  set()  # colletion of Unique Urls. 
@@ -218,3 +218,41 @@ def LongestPageWord():
     """
     
     pass
+
+def tokenize(text):
+
+    # Existing tokenization logic here
+
+    list_data = []
+
+    for i in text:  # Loop through the words eliminating the special chanracters only characters.
+        word = ""
+        for j in i:
+            if j.isalnum() and j.isascii():
+                word += j
+            else:
+                if word:
+                    list_data.append(word.lower())
+                word = ""
+        if word not in STOPWORDS and word.isalnum():
+            list_data.append(word.lower())
+        # closing file a
+
+    return list_data
+
+# Checking for Low information value pages...
+# Criteria Matching more than 50% After 
+# removing the most Commong words.
+
+def is_content_trivial_or_similar(current_page_tokens):
+
+    # Check if the content is trivial (e.g., all tokens are the same) or similar to any previously fetched page
+    if len(current_page_tokens) <= 1 or all(token == next(iter(current_page_tokens)) for token in current_page_tokens):
+        return True
+    for prev_tokens in previous_pages_tokens:
+        common_tokens = current_page_tokens.intersection(prev_tokens)
+        # Define your own similarity threshold
+        similarity_threshold = 0.5
+        if len(common_tokens) / min(len(current_page_tokens), len(prev_tokens)) > similarity_threshold:
+            return True
+    return False
