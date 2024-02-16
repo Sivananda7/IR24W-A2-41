@@ -338,3 +338,4 @@ def get_report():
             myFile.write(
                 f"{top_words[i][0]} => {top_words[i][1]}"
             )
+            
