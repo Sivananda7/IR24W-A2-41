@@ -34,7 +34,7 @@ STOPWORDS = [
 
 # Lenght gives all the unique Urls.
 unique_urls =  set()  # colletion of Unique Urls. 
-
+ics_subdomains = {} # Key : Array [URLS]
 
 def scraper(url, resp):
     # Storing links from the next pages.
@@ -184,12 +184,22 @@ def extractWebsitesUnderDomain(url):
     Takes the domain name and gives the 
     all the domain under it.
 
+    Just adds the url to the ICS_SUBDOMAINS.
+
     parameter: Takes a URL ()
     return : None
     """
+    
     domain = urlparse(url).netloc.lower() # To get the domain of the URL e ics.uci.edu 
     if (url.endswith("ics.uci.edu ") == False):
         return 
-    
-    pass
+    subdomain = domain.replace(".ics.uci.edu", "")
+    if subdomain in ics_subdomains:
+        if url in ics_subdomains:
+            pass # Already present in the array
+        else:
+            ics_subdomains[subdomain].append(url) # Adding the url to the subdomain
+    else:  # subdomain not in main domains.
+        ics_subdomains[subdomain] = [] # Create a array
+        ics_subdomains[subdomain].append(url)  # Adding the url to the subdomain
 
