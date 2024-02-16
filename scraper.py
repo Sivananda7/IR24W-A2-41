@@ -68,6 +68,15 @@ def extract_next_links(url, resp):
     # Some files are very large. Assuming Reading only 10MB pages. That is 1024*1024*10
     # with word limit of not more than 500. 
 
+    # Tokenize the content of the current page
+    content = soup.get_text()
+    current_page_tokens = set(tokenize(content))
+    # Skip pages with trivial or highly similar content
+    if is_content_trivial_or_similar(current_page_tokens):
+        return []
+    # Add current page tokens to the global list for future comparisons
+    previous_pages_tokens.append(current_page_tokens)
+    
     words = soup.get_text().split() # Number of words.
     size_of_page = len(words.encode('utf-8'))  # Size in Bytes
     
