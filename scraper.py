@@ -290,3 +290,39 @@ def is_content_trivial_or_similar(current_page_tokens):
         if len(common_tokens) / min(len(current_page_tokens), len(prev_tokens)) > similarity_threshold:
             return True
     return False
+
+
+
+def get_report():
+    """
+
+    It createss a Text File Report.txt what 
+    the crawler has done. It Addes the unique Urls
+    Length of Urls.
+
+    return : None
+
+    """
+
+    # Sorting the unique_url lexiograhically.
+    global longest_word,longest_word_url,unique_urls, number_of_unique_urls
+
+    ics_subdomains = dict(sorted(ics_subdomains.items()))
+
+    with open("Report.txt", "w") as myFile:
+        myFile.write(
+            f"Largest Page word is: {longest_word} and it's URl is: {longest_word_url}"
+        )
+
+        myFile.write(
+            f"Number of Pages Crawler is: {unique_urls}"
+        )
+
+        for web in ics_subdomains:
+            myFile.write(
+                f"https://{web}.ics.uci.edu  => {len(ics_subdomains[web])}"  # Websites : Number
+            )
+            pass
+
+    pass
+
