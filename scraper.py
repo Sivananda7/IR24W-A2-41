@@ -322,20 +322,20 @@ def get_report():
 
     with open("Report.txt", "w") as myFile:
         myFile.write(
-            f"Largest Page word is: {longest_word} and it's URl is: {longest_word_url}"
+            f"Largest Page word is: {longest_word} and it's URl is: {longest_word_url}\n"
         )
 
         myFile.write(
-            f"Number of Pages Crawler is: {unique_urls}"
+            f"Number of Pages Crawler is: {unique_urls}\n"
         )
 
         for web in ics_subdomains:
             myFile.write(
-                f"https://{web}.ics.uci.edu  => {len(ics_subdomains[web])}"  # Websites : Number
+                f"https://{web}.ics.uci.edu  => {len(ics_subdomains[web])}\n"  # Websites : Number
             )
         
         for i in range(50):
             myFile.write(
-                f"{top_words[i][0]} => {top_words[i][1]}"
+                f"{top_words[i][0]} => {top_words[i][1]}\n"
             )
             
