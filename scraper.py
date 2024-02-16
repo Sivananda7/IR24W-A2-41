@@ -180,13 +180,16 @@ def is_valid(url):
 
 def extractWebsitesUnderDomain(url):
     """
+    Domian: ics.uci.edu 
     Takes the domain name and gives the 
     all the domain under it.
 
     parameter: Takes a URL ()
     return : None
     """
-    domain = urlparse(url).netloc.lower() # To get the domain of the URL eg: ics.uci.edu 
-
+    domain = urlparse(url).netloc.lower() # To get the domain of the URL e ics.uci.edu 
+    if (url.endswith("ics.uci.edu ") == False):
+        return 
+    
     pass
 
