@@ -307,6 +307,9 @@ def get_report():
     # Sorting the unique_url lexiograhically.
     global longest_word,longest_word_url,unique_urls, number_of_unique_urls
 
+    top_words = sorted(unique_words.items(), key = lambda f: (-f[1], f[0]))
+
+
     ics_subdomains = dict(sorted(ics_subdomains.items()))
 
     with open("Report.txt", "w") as myFile:
@@ -322,7 +325,9 @@ def get_report():
             myFile.write(
                 f"https://{web}.ics.uci.edu  => {len(ics_subdomains[web])}"  # Websites : Number
             )
-            pass
-
-    pass
+        
+        for i in range(50):
+            myFile.write(
+                f"{top_words[i][0]} => {top_words[i][1]}"
+            )
 
