@@ -35,6 +35,7 @@ STOPWORDS = [
 # Lenght gives all the unique Urls.
 unique_urls =  set()  # colletion of Unique Urls. 
 ics_subdomains = {} # Key : Array [URLS]
+unique_words = {} # Get all the Unique words.
 
 def scraper(url, resp):
     # Storing links from the next pages.
@@ -65,7 +66,7 @@ def extract_next_links(url, resp):
     # with word limit of not more than 500. 
 
     words = soup.get_text().split() # Number of words.
-    size_of_page = len(str(soup)) # Size in bytes.
+    size_of_page = len(words.encode('utf-8'))  # Size in Bytes
     
 
     if size_of_page < 10*1024*1024 and words < 500:
@@ -161,6 +162,12 @@ def is_valid(url):
             return False 
         
 
+        # Checking for site Maps.
+        
+        if "sitemap" in parsed.path.lower():
+            return False
+        
+
         # Checking for Low information value pages...
         # Criteria Matching more than 50% After 
         # removing the most Commong words.
@@ -191,11 +198,11 @@ def extractWebsitesUnderDomain(url):
     """
     
     domain = urlparse(url).netloc.lower() # To get the domain of the URL e ics.uci.edu 
-    if (url.endswith("ics.uci.edu ") == False):
+    if (not url.endswith("ics.uci.edu")):
         return 
     subdomain = domain.replace(".ics.uci.edu", "")
     if subdomain in ics_subdomains:
-        if url in ics_subdomains:
+        if url in ics_subdomains[subdomain]:
             pass # Already present in the array
         else:
             ics_subdomains[subdomain].append(url) # Adding the url to the subdomain
@@ -203,3 +210,11 @@ def extractWebsitesUnderDomain(url):
         ics_subdomains[subdomain] = [] # Create a array
         ics_subdomains[subdomain].append(url)  # Adding the url to the subdomain
 
+
+
+def LongestPageWord():
+    """
+    Finds the largest Page and The Common Words
+    """
+    
+    pass
