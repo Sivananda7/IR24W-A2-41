@@ -90,7 +90,7 @@ def extract_next_links(url, resp):
     size_of_page = len(str(soup))   # Size in Bytes
     
 
-    if size_of_page < 10*1024*1024 and words > 200:
+    if size_of_page < 10*1024*1024 and words > 100:
         # Then add the page to Links 
 
         for link in soup.find_all('a', href=True):
@@ -136,6 +136,11 @@ def is_valid(url):
 
         # 
         #
+        reject = ['doku.php', 'ical', '.jpg', 'pdf',
+                  '/pdf/', 'ical', 'mailto', '?share=', '?format', 'archive']
+        for j in reject:
+            if j in url:
+                return False
             
         #Checking if the domain is only of this form
         #Only ics.uci.edu
@@ -149,7 +154,7 @@ def is_valid(url):
         if url in unique_urls:
             return False
         
-        if url.count("/") > 6:  # Very large URL avoiding it.
+        if url.count("/") > 7:  # Very large URL avoiding it Thala.
             return False
         
         # Checking for Traps..
@@ -314,7 +319,7 @@ def get_report():
     """
 
     # Sorting the unique_url lexiograhically.
-    global longest_word,longest_word_url,unique_urls, number_of_unique_urls
+    global longest_word,longest_word_url,unique_urls, number_of_unique_urls,ics_subdomains
 
     top_words = sorted(unique_words.items(), key = lambda f: (-f[1], f[0]))
 
