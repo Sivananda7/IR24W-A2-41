@@ -242,7 +242,7 @@ def LongestPageWord(url, resp):
     """
     Finds the largest Page and The Common Words
     """
-    global longest_word, longest_word_url, number_of_unique_urls
+    global longest_word, longest_word_url, number_of_unique_urls, unique_urls,unique_words
     soup = BeautifulSoup(resp.raw_response.content, "html.parser")
     text = soup.get_text()
 
@@ -319,7 +319,7 @@ def get_report():
     """
 
     # Sorting the unique_url lexiograhically.
-    global longest_word,longest_word_url,unique_urls, number_of_unique_urls,ics_subdomains
+    global longest_word,longest_word_url,unique_urls, number_of_unique_urls,ics_subdomains,unique_words
 
     top_words = sorted(unique_words.items(), key = lambda f: (-f[1], f[0]))
 
