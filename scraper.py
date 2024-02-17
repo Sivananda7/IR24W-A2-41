@@ -52,6 +52,7 @@ def scraper(url, resp):
         for link in links:
             if is_valid(link):
                 valid_links.append(link)
+                extractWebsitesUnderDomain(link)
         LongestPageWord(url,resp)
     return valid_links
 
@@ -85,11 +86,11 @@ def extract_next_links(url, resp):
     # Add current page tokens to the global list for future comparisons
     previous_pages_tokens.append(current_page_tokens)
     
-    words = soup.get_text().split() # Number of words.
-    size_of_page = len(words.encode('utf-8'))  # Size in Bytes
+    words = len(soup.get_text().split()) # Number of words.
+    size_of_page = len(str(soup))   # Size in Bytes
     
 
-    if size_of_page < 10*1024*1024 and words < 500:
+    if size_of_page < 10*1024*1024 and words > 200:
         # Then add the page to Links 
 
         for link in soup.find_all('a', href=True):
