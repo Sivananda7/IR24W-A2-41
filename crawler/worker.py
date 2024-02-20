@@ -36,4 +36,3 @@ class Worker(Thread):
             except:
                 continue
         
-        scraper.get_report()
